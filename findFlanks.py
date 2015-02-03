@@ -2,15 +2,16 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 from Bio import SeqIO
 from optparse import OptionParser
-import sys
+from Bio.SeqRecord import SeqRecord
 
 def opts():
 	usage = "usage: %prog [options]"
 	parser = OptionParser(usage=usage)
 	parser.add_option('-f', '--flanking', dest='flanks', action='store', help='fasta file of 2 flanking sequences')
 	parser.add_option('-c', '--contigs', dest='contigs', action='store', help='fasta file of contigs')
-	parser.add_option('-o', '--output', dest='blast_output', action='store', help='name for blast output xml')
+	parser.add_option('-b', '--blast_output', dest='blast_output', action='store', help='name for blast output xml')
 	parser.add_option('-r', '--results', dest='results', action='store', help='name for results file')
+	parser.add_option('-p', '--regions', dest='regions', action='store', help='fasta file of regions of interest')
 	return parser.parse_args()
 
 def runBlastn(q_seq, s_seq, out_file):
@@ -45,15 +46,20 @@ def returnMiddleSequence(in_handle, contig, coordinates):
 		records = SeqIO.parse(f, 'fasta')
 		for record in records:
 			if record.id == contig:
-				print record.seq[start:end]
-
-
+				new_seq = record.seq[start:end]
+				new_id = record.id+'|'+str(start)+':'+str(end)
+	new_record = SeqRecord(new_seq, id=new_id, description='')
+	return(new_record)
 
 def oneContig(contigs):
 	if len(contigs) == 1:
 		return True
 	else:
 		return False
+
+def bestHit():
+	return
+
 
 ###########################
 
@@ -62,11 +68,12 @@ if __name__ == '__main__':
 	
 	(options,args) = opts()
 	flanking=options.flanks.strip()
-	contigs=options.contigs.strip()
-	blast_xml=options.output.strip()
+	contigs_file=options.contigs.strip()
+	blast_xml=options.blast_output.strip()
 	results=options.results.strip()
+	potential_regions=options.regions.strip()
 	
-	runBlastn(flanking, contigs, blast_xml)
+	runBlastn(flanking, contigs_file, blast_xml)
 	with open(blast_xml, 'r') as f:
 		blast_records = NCBIXML.parse(f)
 		for blast_record in blast_records:
@@ -75,4 +82,8 @@ if __name__ == '__main__':
 	contigs, coordinates = calculateRegionOfInterest(results_dict)	
 
 	if oneContig(contigs)==True:
-		returnMiddleSequence(sys.argv[2], contigs.pop(), coordinates)
+		with open(results+'.fa','w') as temp_handle:
+			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
+			SeqIO.write(record,temp_handle,'fasta')
+
+		runBlastn(results+'.fa', potential_regions, blast_xml)
