@@ -1,9 +1,17 @@
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 from Bio import SeqIO
+from optparse import OptionParser
 import sys
 
-
+def opts():
+	usage = "usage: %prog [options]"
+	parser = OptionParser(usage=usage)
+	parser.add_option('-f', '--flanking', dest='flanks', action='store', help='fasta file of 2 flanking sequences')
+	parser.add_option('-c', '--contigs', dest='contigs', action='store', help='fasta file of contigs')
+	parser.add_option('-o', '--output', dest='blast_output', action='store', help='name for blast output xml')
+	parser.add_option('-r', '--results', dest='results', action='store', help='name for results file')
+	return parser.parse_args()
 
 def runBlastn(q_seq, s_seq, out_file):
 	blastn_cline = NcbiblastnCommandline(query = q_seq, subject = s_seq, evalue=0.001, outfmt=5, out = out_file)
@@ -51,8 +59,15 @@ def oneContig(contigs):
 
 if __name__ == '__main__':
 	results_dict = {}
-	runBlastn(sys.argv[1], sys.argv[2], sys.argv[3])
-	with open(sys.argv[3], 'r') as f:
+	
+	(options,args) = opts()
+	flanking=options.flanks.strip()
+	contigs=options.contigs.strip()
+	blast_xml=options.output.strip()
+	results=options.results.strip()
+	
+	runBlastn(flanking, contigs, blast_xml)
+	with open(blast_xml, 'r') as f:
 		blast_records = NCBIXML.parse(f)
 		for blast_record in blast_records:
 			results_dict = parseBlastResults(blast_record, results_dict)
