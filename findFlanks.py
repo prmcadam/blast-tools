@@ -95,6 +95,6 @@ if __name__ == '__main__':
 
 
 	for i in regions_dict:
-		result_string = i+','+','.join([str(x) for x in regions_dict[i]])+'\n'
+		result_string = results+','+i+','+','.join([str(x) for x in regions_dict[i]])+'\n'
 		with open(results+'.csv','w') as f:
 			f.write(result_string)
