@@ -93,11 +93,11 @@ if __name__ == '__main__':
 				record=returnMiddleSequence(contigs_file, contig, coordinates)
 				SeqIO.write(records,temp_handle,'fasta')
 
-		runBlastn(results+'.fa', potential_regions, regions_xml)
-		with open(regions_xml, 'r') as f:
-			blast_records = NCBIXML.parse(f)
-			for blast_record in blast_records:
-				regions_dict = parseBlastResults(blast_record, regions_dict)
+	runBlastn(results+'.fa', potential_regions, regions_xml)
+	with open(regions_xml, 'r') as f:
+		blast_records = NCBIXML.parse(f)
+		for blast_record in blast_records:
+			regions_dict = parseBlastResults(blast_record, regions_dict)
 
 
 	for i in regions_dict:
