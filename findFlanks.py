@@ -82,11 +82,11 @@ if __name__ == '__main__':
 
 	contigs, coordinates = calculateRegionOfInterest(results_dict)	
 
-	if oneContig(contigs)==True:
+	if len(contigs)==1:
 		with open(results+'.fa','w') as temp_handle:
 			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
 			SeqIO.write(record,temp_handle,'fasta')
-	else:
+	elif len(contigs) > 1:
 		records = []
 		with open(results+'.fa','w') as temp_handle:
 			for contig in contigs:
