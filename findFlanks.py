@@ -95,4 +95,4 @@ if __name__ == '__main__':
 
 
 	for i in regions_dict:
-		print i, ' '.join(regions_dict[i])
+		print i, ' '.join([str(x) for x in regions_dict[i]])
