@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	flanking=options.flanks.strip()
 	contigs_file=options.contigs.strip()
 	blast_xml=options.blast_output.strip()+'.1.xml'
-        regions_xml=options.blast_output.strip()+'.2.xml'
+	regions_xml=options.blast_output.strip()+'.2.xml'
 	results=options.blast_output.strip()+'.results'
 	potential_regions=options.regions.strip()
 	
@@ -86,18 +86,22 @@ if __name__ == '__main__':
 		with open(results+'.fa','w') as temp_handle:
 			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
 			SeqIO.write(record,temp_handle,'fasta')
-	elif len(contigs) > 1:
-		records = []
-		with open(results+'.fa','w') as temp_handle:
-			for contig in contigs:
-				record=returnMiddleSequence(contigs_file, contig, coordinates)
-				SeqIO.write(records,temp_handle,'fasta')
+		runBlastn(results+'.fa', potential_regions, regions_xml)
+		with open(regions_xml, 'r') as f:
+			blast_records = NCBIXML.parse(f)
+			for blast_record in blast_records:
+				regions_dict = parseBlastResults(blast_record, regions_dict)
 
-	runBlastn(results+'.fa', potential_regions, regions_xml)
-	with open(regions_xml, 'r') as f:
-		blast_records = NCBIXML.parse(f)
-		for blast_record in blast_records:
-			regions_dict = parseBlastResults(blast_record, regions_dict)
+	else:
+		print results
+#	elif len(contigs) > 1:
+#		records = []
+#		with open(results+'.fa','w') as temp_handle:
+#			for contig in contigs:
+#				record=returnMiddleSequence(contigs_file, contig, coordinates)
+#				SeqIO.write(records,temp_handle,'fasta')
+
+
 
 
 	for i in regions_dict:
