@@ -24,7 +24,7 @@ def parseBlastResults(blast_record, results_dict):
 		for hsp in alignment.hsps:
 			results_dict[blast_record.query].append(str(alignment.hit_def))
 			results_dict[blast_record.query].append(hsp.sbjct_start)
-            results_dict[blast_record.query].append(hsp.sbjct_end)
+			results_dict[blast_record.query].append(hsp.sbjct_end)
 	return results_dict
 
 def calculateRegionOfInterest(results_dict):
