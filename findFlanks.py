@@ -10,12 +10,11 @@ def opts():
 	parser.add_option('-f', '--flanking', dest='flanks', action='store', help='fasta file of 2 flanking sequences')
 	parser.add_option('-c', '--contigs', dest='contigs', action='store', help='fasta file of contigs')
 	parser.add_option('-b', '--blast_output', dest='blast_output', action='store', help='name for blast output xml')
-	parser.add_option('-r', '--results', dest='results', action='store', help='name for results file')
 	parser.add_option('-p', '--regions', dest='regions', action='store', help='fasta file of regions of interest')
 	return parser.parse_args()
 
 def runBlastn(q_seq, s_seq, out_file):
-	blastn_cline = NcbiblastnCommandline(query = q_seq, subject = s_seq, evalue=0.001, outfmt=5, out = out_file)
+	blastn_cline = NcbiblastnCommandline(query = q_seq, subject = s_seq, evalue=0.001, outfmt=5, out = out_file, max_target_seqs = 1)
 	stdout,stderr=blastn_cline()
 	return
 
@@ -41,13 +40,13 @@ def calculateRegionOfInterest(results_dict):
 	return contig, coordinates
 
 def returnMiddleSequence(in_handle, contig, coordinates):
-	start, end = coordinates[0], coordinates[1]
+	start, end = coordinates[0]-1, coordinates[1]
 	with open(in_handle,'r') as f:
 		records = SeqIO.parse(f, 'fasta')
 		for record in records:
 			if record.id == contig:
 				new_seq = record.seq[start:end]
-				new_id = record.id+'|'+str(start)+':'+str(end)
+				new_id = record.id+'|'+str(start-1)+':'+str(end)
 	new_record = SeqRecord(new_seq, id=new_id, description='')
 	return(new_record)
 
@@ -65,12 +64,14 @@ def bestHit():
 
 if __name__ == '__main__':
 	results_dict = {}
-	
+	regions_dict = {}
+
 	(options,args) = opts()
 	flanking=options.flanks.strip()
 	contigs_file=options.contigs.strip()
-	blast_xml=options.blast_output.strip()
-	results=options.results.strip()
+	blast_xml=options.blast_output.strip()+'.1.xml'
+        regions_xml=options.blast_output.strip()+'.2.xml'
+	results=options.blast_output.strip()+'.results'
 	potential_regions=options.regions.strip()
 	
 	runBlastn(flanking, contigs_file, blast_xml)
@@ -86,4 +87,11 @@ if __name__ == '__main__':
 			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
 			SeqIO.write(record,temp_handle,'fasta')
 
-		runBlastn(results+'.fa', potential_regions, blast_xml)
+		runBlastn(results+'.fa', potential_regions, regions_xml)
+		with open(regions_xml, 'r') as f:
+			blast_records = NCBIXML.parse(f)
+			for blast_record in blast_records:
+	                        regions_dict = parseBlastResults(blast_record, regions_dict)
+
+
+	print regions_dict
