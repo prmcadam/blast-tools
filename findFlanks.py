@@ -91,7 +91,8 @@ if __name__ == '__main__':
 		with open(regions_xml, 'r') as f:
 			blast_records = NCBIXML.parse(f)
 			for blast_record in blast_records:
-	                        regions_dict = parseBlastResults(blast_record, regions_dict)
+				regions_dict = parseBlastResults(blast_record, regions_dict)
 
 
-	print regions_dict
+	for i in regions_dict:
+		print i, regions_dict[i]
