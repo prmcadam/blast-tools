@@ -24,7 +24,7 @@ def parseBlastResults(blast_record, results_dict):
 		for hsp in alignment.hsps:
 			results_dict[blast_record.query].append(str(alignment.hit_def))
 			results_dict[blast_record.query].append(hsp.sbjct_start)
-                        results_dict[blast_record.query].append(hsp.sbjct_end)
+            results_dict[blast_record.query].append(hsp.sbjct_end)
 	return results_dict
 
 def calculateRegionOfInterest(results_dict):
@@ -33,7 +33,7 @@ def calculateRegionOfInterest(results_dict):
 	for x in results_dict:
 		contig.add(results_dict[x][0])
 		coordinates.append(results_dict[x][1])
-                coordinates.append(results_dict[x][2])
+		coordinates.append(results_dict[x][2])
 	coordinates.sort()
 	coordinates.remove(max(coordinates))
         coordinates.remove(min(coordinates))
@@ -87,7 +87,10 @@ if __name__ == '__main__':
 			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
 			SeqIO.write(record,temp_handle,'fasta')
 	else:
-		print contigs
+		records = []
+		for contig in contigs:
+			record=returnMiddleSequence(contigs_file, contig, coordinates)
+			SeqIO.write(records,temp_handle,'fasta')
 
 		runBlastn(results+'.fa', potential_regions, regions_xml)
 		with open(regions_xml, 'r') as f:
