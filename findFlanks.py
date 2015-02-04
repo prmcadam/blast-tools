@@ -88,6 +88,7 @@ if __name__ == '__main__':
 			SeqIO.write(record,temp_handle,'fasta')
 	else:
 		records = []
+		with open(results+'.fa','w') as temp_handle:
 		for contig in contigs:
 			record=returnMiddleSequence(contigs_file, contig, coordinates)
 			SeqIO.write(records,temp_handle,'fasta')
