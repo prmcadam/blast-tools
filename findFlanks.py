@@ -86,6 +86,8 @@ if __name__ == '__main__':
 		with open(results+'.fa','w') as temp_handle:
 			record=returnMiddleSequence(contigs_file, contigs.pop(), coordinates)
 			SeqIO.write(record,temp_handle,'fasta')
+	else:
+		print contigs
 
 		runBlastn(results+'.fa', potential_regions, regions_xml)
 		with open(regions_xml, 'r') as f:
